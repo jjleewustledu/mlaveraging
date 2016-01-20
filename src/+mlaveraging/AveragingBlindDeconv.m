@@ -15,7 +15,7 @@ classdef AveragingBlindDeconv < mlaveraging.AveragingStrategy
     methods (Static)
         function imcmp = deconv(imcmp)
             import mlfourd.*;
-            nxt     = imcmp.cachedNext;
+            nxt     = imcmp.cached;
             AveragingBlindDeconv.plotFrames(nxt.img);
             if (nxt.rank > 3)
                 nxt.img = nxt.img(:,:,:,1:AveragingBlindDeconv.duration);
@@ -82,13 +82,13 @@ classdef AveragingBlindDeconv < mlaveraging.AveragingStrategy
     
 	methods 
         function imgcmp = average(this, imgcmp) 
-            imgcmp.reset;
-            while (imgcmp.hasNext)
-                imgcmp = imgcmp.iterateNext;
+            iter = imgcmp.createIterator;
+            while (iter.hasNext)
+                cached = iter.next;
                 if (isa(imgcmp, 'mlfourd.ImagingComposite'))
-                    imgcmp.cachedNext = this.average(imgcmp.cachedNext);
+                    imgcmp = this.average(cached);
                 else
-                    imgcmp.cachedNext = mlfourd.AveragingBlindDeconv.deconv(imgcmp.cachedNext);
+                    imgcmp = mlfourd.AveragingBlindDeconv.deconv(cached);
                 end
             end
         end 

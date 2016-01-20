@@ -48,7 +48,7 @@ classdef SusanFacade
     
     methods %% set/get
         function ni  = get.nii(this)
-            assert(isa(this.nii_, 'mlfourd.NIfTIInterface'));
+            assert(isa(this.nii_, 'mlfourd.INIfTI'));
             ni = this.nii_;
         end          
         function bth = get.brightThresh(this)
@@ -81,7 +81,7 @@ classdef SusanFacade
             
             nii = imcast(nii, 'mlfourd.NIfTI');
             p = inputParser;
-            addRequired(p, 'nii', @(x) isa(x, 'mlfourd.NIfTIInterface'));
+            addRequired(p, 'nii', @(x) isa(x, 'mlfourd.INIfTI'));
             addOptional(p, 'hwhh', max(mlpet.PETBuilder.petPointSpread)/2, @isnumeric);
             parse(p, nii, varargin{:});
 
