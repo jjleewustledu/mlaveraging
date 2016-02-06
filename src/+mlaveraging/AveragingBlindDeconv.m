@@ -1,5 +1,6 @@
 classdef AveragingBlindDeconv < mlaveraging.AveragingStrategy 
-	%% AVERAGINGGAUSS is a place-holder for AveragingStrstegy for the case of no averaging
+	%% AVERAGINGGAUSS
+    
 	%  Version $Revision: 2616 $ was created $Date: 2013-09-08 23:15:29 -0500 (Sun, 08 Sep 2013) $ by $Author: jjlee $,  
  	%  last modified $LastChangedDate: 2013-09-08 23:15:29 -0500 (Sun, 08 Sep 2013) $ and checked into svn repository $URL: file:///Users/jjlee/Library/SVNRepository_2012sep1/mpackages/mlaveraging/src/+mlaveraging/trunk/AveragingBlindDeconv.m $ 
  	%  Developed on Matlab 7.14.0.739 (R2012a) 
@@ -7,24 +8,27 @@ classdef AveragingBlindDeconv < mlaveraging.AveragingStrategy
  	%  N.B. classdef (Sealed, Hidden, InferiorClasses = {?class1,?class2}, ConstructOnLoad) 
 
 	properties (Constant)
-        magic      = 3;
+        magic      = 6;
         duration   = 60;
+        numit      = 10;
         filesuffix = '_blindd';
     end 
 
     methods (Static)
-        function imcmp = deconv(imcmp)
-            import mlfourd.*;
-            nxt     = imcmp.cached;
+        function [ic,psf] = deconv(ic)
+            import mlfourd.* mlaveraging.*;
+            nxt = ic.niftid;
             AveragingBlindDeconv.plotFrames(nxt.img);
             if (nxt.rank > 3)
                 nxt.img = nxt.img(:,:,:,1:AveragingBlindDeconv.duration);
                 nxt.img = sum(nxt.img, nxt.rank);
             end
-            nxt.img = deconvblind(nxt.img, fspecial('gaussian', AveragingBlindDeconv.magic, 2.9387/4), ...
-                                                                AveragingBlindDeconv.magic);
-            imcmp = ImagingComponent.load(nxt);
-            imcmp.saveas([imcmp.fileprefix AveragingBlindDeconv.filesuffix]);
+            len = AveragingBlindDeconv.magic;
+            damp = 0.10*dipmedian(nxt.img);
+            [nxt.img,psf] = deconvblind(double(nxt.img), ones(len,len,len), ...
+                                                                AveragingBlindDeconv.numit, damp);
+            ic = ImagingContext.load(nxt);
+            ic.saveas([ic.fileprefix AveragingBlindDeconv.filesuffix]);
         end % static deconv
         function plotFrames(img)
             assert(isnumeric(img));
@@ -85,7 +89,7 @@ classdef AveragingBlindDeconv < mlaveraging.AveragingStrategy
             iter = imgcmp.createIterator;
             while (iter.hasNext)
                 cached = iter.next;
-                if (isa(imgcmp, 'mlfourd.ImagingComposite'))
+                if (isa(imgcmp, 'mlfourd.INIfTI'))
                     imgcmp = this.average(cached);
                 else
                     imgcmp = mlfourd.AveragingBlindDeconv.deconv(cached);

@@ -1,7 +1,5 @@
 classdef SusanFacade 
 	%% SUSANFACADE is a wrapper for the FSL Susan filtering schemes
-	%  
-	%  
 	 
 	%% Version $Revision$ was created $Date$ by $Author$  
  	%% and checked into svn repository $URL$ 
