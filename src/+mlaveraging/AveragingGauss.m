@@ -6,7 +6,11 @@ classdef AveragingGauss < mlaveraging.AveragingStrategy
  	%  $Id: AveragingGauss.m 2584 2013-08-29 07:59:11Z jjlee $ 
  	%  N.B. classdef (Sealed, Hidden, InferiorClasses = {?class1,?class2}, ConstructOnLoad) 
 
-	properties 
+	properties (Constant)
+        KERNEL_MULTIPLE = 3
+    end
+    
+    properties
         blur = mlpet.PETBuilder.petPointSpread;
     end 
 
@@ -69,7 +73,6 @@ classdef AveragingGauss < mlaveraging.AveragingStrategy
             %  See also:  NiiBrowser.gaussFullwidth
             %
             import mlfourd.*;
-            KERNEL_MULTIPLE = 3;
             switch (nargin)
                 case 2
                     metric  = 'voxel';
@@ -103,7 +106,7 @@ classdef AveragingGauss < mlaveraging.AveragingStrategy
             if (norm(sigma) < eps); return; end % Trivial case
             
             % Assemble filter kernel & call imfilter              
-            krnlLens = KERNEL_MULTIPLE * ceil(sigma);
+            krnlLens = mlaveraging.AveragingGauss.KERNEL_MULTIPLE * ceil(sigma);
             for q = 1:length(krnlLens) %#ok<FORPF>
                 if (krnlLens(q) < 1); krnlLens(q) = 1; end
             end             
